@@ -13,15 +13,15 @@ languages = {
 }
 
 # Function to set up and run the translation workflow
-def translate_text(input_text, language):
+def translate_text(input_text, language, api_key):
     try:
         # Set up the prompt and connection
         prompt_template = languages[language] + input_text
         prompt = Prompt(messages=[Message(content=prompt_template, role="user")])
         llm = OpenAI(
             id="openai",
-            connection=OpenAIConnection(api_key="your_openai_api_key"),  # Replace with a valid API key
-            model="gpt-4o",
+            connection=OpenAIConnection(api_key=api_key),
+            model="gpt-4",
             temperature=0.3,
             max_tokens=1000,
             prompt=prompt
@@ -42,13 +42,19 @@ def translate_text(input_text, language):
 
 # Streamlit user interface setup
 st.title('Multilingual Translator')
+
+# Add a text input for the API key
+api_key = st.text_input("Enter your OpenAI API key:", type="password")
+
 text_to_translate = st.text_area("Enter the English text you want to translate:", value='', max_chars=500)
 selected_language = st.selectbox("Select the language to translate to:", options=list(languages.keys()))
 
 # Button to perform translation
 if st.button('Translate'):
-    if text_to_translate:
-        translation = translate_text(text_to_translate, selected_language)
+    if not api_key:
+        st.write("Please enter your OpenAI API key.")
+    elif text_to_translate:
+        translation = translate_text(text_to_translate, selected_language, api_key)
         st.write('Translation:', translation)
     else:
         st.write("Please enter some text to translate.")
